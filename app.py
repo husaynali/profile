@@ -1,5 +1,4 @@
 import streamlit as st
-import json
 from datetime import datetime
 
 # Page config
@@ -10,7 +9,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Custom CSS to make it look like Twitter
+# Custom CSS
 st.markdown("""
 <style>
     /* Hide Streamlit elements */
@@ -36,7 +35,7 @@ st.markdown("""
     
     /* Profile header */
     .profile-header {
-        background: linear-gradient(rgba(29, 155, 240, 0.3), rgba(0, 0, 0, 0.8)), 
+        background: linear-gradient(rgba(102, 0, 153, 0.3), rgba(0, 0, 0, 0.8)), 
                     url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=300&fit=crop');
         background-size: cover;
         background-position: center;
@@ -88,6 +87,7 @@ st.markdown("""
         margin-top: 12px;
         font-size: 15px;
         color: #71767b;
+        flex-wrap: wrap;
     }
     
     .profile-meta span {
@@ -112,7 +112,7 @@ st.markdown("""
     
     .tweet-header {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         gap: 12px;
         margin-bottom: 12px;
     }
@@ -124,10 +124,19 @@ st.markdown("""
         background-image: url('https://avatars.githubusercontent.com/u/206615568?v=4');
         background-size: cover;
         background-position: center;
+        flex-shrink: 0;
     }
     
-    .tweet-author {
+    .tweet-author-info {
         flex: 1;
+        min-width: 0;
+    }
+    
+    .tweet-author-line {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex-wrap: wrap;
     }
     
     .tweet-name {
@@ -146,12 +155,21 @@ st.markdown("""
         font-size: 16px;
         line-height: 1.5;
         margin-bottom: 12px;
+        margin-left: 60px;
+    }
+    
+    .tweet-title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #e7e9ea;
+        margin-bottom: 8px;
     }
     
     .tweet-image {
         width: 100%;
         border-radius: 16px;
         margin-top: 12px;
+        margin-left: 60px;
         border: 1px solid #2f3336;
     }
     
@@ -160,15 +178,43 @@ st.markdown("""
         flex-wrap: wrap;
         gap: 8px;
         margin-top: 12px;
+        margin-left: 60px;
     }
     
     .tweet-tag {
-        background-color: #1d9bf015;
-        color: #1d9bf0;
+        background-color: #6600991a;
+        color: #9966cc;
         padding: 4px 12px;
         border-radius: 12px;
         font-size: 14px;
-        border: 1px solid #1d9bf030;
+        border: 1px solid #66009930;
+    }
+    
+    .tweet-links {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+        margin-left: 60px;
+        flex-wrap: wrap;
+    }
+    
+    .tweet-link-btn {
+        background-color: #660099;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: bold;
+        text-decoration: none;
+        display: inline-block;
+        transition: background-color 0.2s;
+        border: none;
+    }
+    
+    .tweet-link-btn:hover {
+        background-color: #7700b3;
+        text-decoration: none;
+        color: white;
     }
     
     .tweet-actions {
@@ -176,6 +222,7 @@ st.markdown("""
         gap: 60px;
         margin-top: 16px;
         padding-top: 12px;
+        margin-left: 60px;
         border-top: 1px solid #2f3336;
     }
     
@@ -190,11 +237,157 @@ st.markdown("""
     }
     
     .action-btn:hover {
-        color: #1d9bf0;
+        color: #9966cc;
     }
     
     .liked {
         color: #f91880 !important;
+    }
+    
+    /* Experience cards */
+    .exp-card {
+        background-color: #000000;
+        border: 1px solid #2f3336;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 16px;
+    }
+    
+    .exp-header {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+    }
+    
+    .exp-icon {
+        width: 48px;
+        height: 48px;
+        background-color: #6600991a;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        flex-shrink: 0;
+    }
+    
+    .exp-details h3 {
+        font-size: 20px;
+        font-weight: bold;
+        color: #e7e9ea;
+        margin: 0;
+    }
+    
+    .exp-details .company {
+        color: #9966cc;
+        font-weight: 600;
+        margin-top: 4px;
+    }
+    
+    .exp-details .meta {
+        display: flex;
+        gap: 16px;
+        color: #71767b;
+        font-size: 14px;
+        margin-top: 8px;
+        flex-wrap: wrap;
+    }
+    
+    .exp-highlights {
+        margin-top: 16px;
+        margin-left: 64px;
+    }
+    
+    .exp-highlights li {
+        color: #e7e9ea;
+        margin-bottom: 8px;
+        line-height: 1.5;
+    }
+    
+    /* Skills section */
+    .skill-bar-container {
+        margin-bottom: 20px;
+    }
+    
+    .skill-bar-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 15px;
+    }
+    
+    .skill-bar-header .name {
+        font-weight: 600;
+        color: #e7e9ea;
+    }
+    
+    .skill-bar-header .percent {
+        color: #71767b;
+    }
+    
+    .skill-bar-bg {
+        height: 8px;
+        background-color: #2f3336;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    
+    .skill-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #660099, #9966cc);
+        border-radius: 4px;
+        transition: width 1s ease-out;
+    }
+    
+    /* Certification cards */
+    .cert-card {
+        background-color: #000000;
+        border: 1px solid #2f3336;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 12px;
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+    }
+    
+    .cert-icon {
+        width: 48px;
+        height: 48px;
+        background-color: #6600991a;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        flex-shrink: 0;
+    }
+    
+    .cert-details h4 {
+        font-size: 18px;
+        font-weight: bold;
+        color: #e7e9ea;
+        margin: 0;
+    }
+    
+    .cert-details .issuer {
+        color: #9966cc;
+        margin-top: 4px;
+    }
+    
+    .cert-details .date {
+        color: #71767b;
+        font-size: 14px;
+        margin-top: 4px;
+    }
+    
+    /* Award card */
+    .award-card {
+        background: linear-gradient(135deg, #66009920, #0066cc20);
+        border: 1px solid #66009950;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 16px;
     }
     
     /* Tab styling */
@@ -214,50 +407,33 @@ st.markdown("""
     
     .stTabs [aria-selected="true"] {
         color: #e7e9ea;
-        border-bottom: 2px solid #1d9bf0;
+        border-bottom: 2px solid #660099;
     }
     
     /* Button styling */
     .stButton > button {
-        background-color: #1d9bf0;
-        color: white;
+        background-color: transparent;
+        color: #71767b;
         border: none;
         border-radius: 20px;
-        padding: 8px 16px;
-        font-weight: bold;
-        transition: background-color 0.2s;
+        padding: 4px 12px;
+        font-weight: normal;
+        transition: color 0.2s;
     }
     
     .stButton > button:hover {
-        background-color: #1a8cd8;
+        color: #9966cc;
+        background-color: transparent;
     }
     
     /* Links */
     a {
-        color: #1d9bf0;
+        color: #9966cc;
         text-decoration: none;
     }
     
     a:hover {
         text-decoration: underline;
-    }
-    
-    .contact-btn {
-        background-color: #1d9bf0;
-        color: white;
-        padding: 12px 24px;
-        border-radius: 24px;
-        text-align: center;
-        font-weight: bold;
-        display: inline-block;
-        margin-top: 20px;
-        border: none;
-        text-decoration: none;
-    }
-    
-    .contact-btn:hover {
-        background-color: #1a8cd8;
-        text-decoration: none;
     }
     
     /* Mobile Responsive Design */
@@ -282,177 +458,16 @@ st.markdown("""
             margin-left: 16px;
         }
         
-        .profile-info {
-            padding: 12px 16px;
-        }
-        
-        .profile-name {
-            font-size: 20px;
-        }
-        
-        .profile-handle {
-            font-size: 14px;
-        }
-        
-        .profile-bio {
-            font-size: 14px;
-            margin-top: 8px;
-        }
-        
-        .profile-meta {
-            flex-direction: column;
-            gap: 8px;
-            font-size: 14px;
-        }
-        
-        .tweet-card {
-            border-radius: 0;
-            border-left: none;
-            border-right: none;
-            padding: 12px 16px;
-            margin-bottom: 0;
-            border-bottom: 1px solid #2f3336;
-        }
-        
-        .tweet-header {
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        
-        .tweet-avatar {
-            width: 40px;
-            height: 40px;
-        }
-        
-        .tweet-name {
-            font-size: 15px;
-        }
-        
-        .tweet-handle {
-            font-size: 14px;
-        }
-        
-        .tweet-content {
-            font-size: 15px;
-            margin-bottom: 10px;
-        }
-        
-        .tweet-image {
-            border-radius: 12px;
-            margin-top: 10px;
-        }
-        
-        .tweet-tags {
-            gap: 6px;
-            margin-top: 10px;
-        }
-        
-        .tweet-tag {
-            padding: 3px 10px;
-            font-size: 13px;
-        }
-        
+        .tweet-content,
+        .tweet-image,
+        .tweet-tags,
+        .tweet-links,
         .tweet-actions {
-            gap: 40px;
-            margin-top: 12px;
-            padding-top: 10px;
+            margin-left: 0;
         }
         
-        .action-btn {
-            font-size: 13px;
-            gap: 6px;
-        }
-        
-        .stTabs [data-baseweb="tab"] {
-            padding: 12px 0;
-            font-size: 14px;
-        }
-        
-        .contact-btn {
-            padding: 10px 20px;
-            font-size: 15px;
-            display: block;
-            width: 100%;
-        }
-        
-        /* Make Streamlit columns stack on mobile */
-        [data-testid="column"] {
-            width: 100% !important;
-            flex: 1 1 100% !important;
-            min-width: 100% !important;
-        }
-    }
-    
-    @media (max-width: 480px) {
-        .profile-header {
-            height: 120px;
-        }
-        
-        .profile-pic {
-            width: 80px;
-            height: 80px;
-            border: 3px solid #000000;
-            margin-top: -40px;
-            margin-left: 12px;
-        }
-        
-        .profile-info {
-            padding: 10px 12px;
-        }
-        
-        .profile-name {
-            font-size: 18px;
-        }
-        
-        .profile-handle {
-            font-size: 13px;
-        }
-        
-        .profile-bio {
-            font-size: 13px;
-        }
-        
-        .profile-meta {
-            font-size: 13px;
-        }
-        
-        .tweet-card {
-            padding: 10px 12px;
-        }
-        
-        .tweet-avatar {
-            width: 36px;
-            height: 36px;
-        }
-        
-        .tweet-name {
-            font-size: 14px;
-        }
-        
-        .tweet-handle {
-            font-size: 13px;
-        }
-        
-        .tweet-content {
-            font-size: 14px;
-        }
-        
-        .tweet-tag {
-            padding: 2px 8px;
-            font-size: 12px;
-        }
-        
-        .tweet-actions {
-            gap: 30px;
-        }
-        
-        .action-btn {
-            font-size: 12px;
-        }
-        
-        .stTabs [data-baseweb="tab"] {
-            padding: 10px 0;
-            font-size: 13px;
+        .exp-highlights {
+            margin-left: 0;
         }
     }
 </style>
@@ -464,8 +479,8 @@ if 'likes' not in st.session_state:
 
 def toggle_like(item_id):
     if item_id not in st.session_state.likes:
-        st.session_state.likes[item_id] = False
-    st.session_state.likes[item_id] = not st.session_state.likes[item_id]
+        st.session_state.likes[item_id] = 0
+    st.session_state.likes[item_id] = 1 if st.session_state.likes[item_id] == 0 else 0
 
 # Profile Header
 st.markdown("""
@@ -475,220 +490,298 @@ st.markdown("""
     <h1 class="profile-name">Hussein Ali</h1>
     <p class="profile-handle">@husaynali</p>
     <p class="profile-bio">
-        BI Developer & Data Analyst 📊 | Computer Science grad specialized in Data | 
-        Building impactful Business solutions | Python • SQL • Power BI | 
-        Gaming 🎮 • Chess ♟️
+        Computer Science graduate and BI Developer with expertise in data analytics, visualization, and cloud technologies. 
+        Skilled in Python, SQL, and modern BI tools (Power BI, Superset, Metabase). Passionate about transforming raw data into actionable insights.
     </p>
     <div class="profile-meta">
         <span>📍 Cairo, Egypt</span>
-        <span>🔗 <a href="mailto:hire-hussein@proton.me">hire-hussein@proton.me</a></span>
-        <span>📅 Joined 2026</span>
+        <span>🌐 <a href="https://hussein-ali.pages.dev" target="_blank">hussein-ali.pages.dev</a></span>
+        <span>📧 <a href="mailto:hire-hussein@proton.me">hire-hussein@proton.me</a></span>
+        <span>📱 <a href="tel:+201012787537">+20 101 278 7537</a></span>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
 # Tabs
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏠 Posts", "💼 Projects", "🛠️ Skills", "📝 Blogs", "📧 Contact"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏠 Posts", "💼 Projects", "💻 Experience", "🛠️ Skills", "🎓 Certifications"])
 
 with tab1:
+    # Welcome post
     st.markdown("""
     <div class="tweet-card">
         <div class="tweet-header">
             <div class="tweet-avatar"></div>
-            <div class="tweet-author">
-                <div class="tweet-name">Hussein Ali</div>
-                <div class="tweet-handle">@husaynali • now</div>
+            <div class="tweet-author-info">
+                <div class="tweet-author-line">
+                    <span class="tweet-name">Hussein Ali</span>
+                    <span class="tweet-handle">@husaynali · now</span>
+                </div>
             </div>
         </div>
         <div class="tweet-content">
-            Welcome to my profile! 👋🏽 I'm a BI Developer passionate about transforming raw data into actionable insights. 
-            Check out my projects below and let's connect if you're looking to build something amazing together!
+            Welcome to my portfolio! 👋 I'm a BI Developer and Data Analyst with a passion for turning complex data into clear, actionable insights. 
+            Currently working at Etisalat Egypt, I specialize in building MIS dashboards, ETL pipelines, and predictive models. 
+            Check out my projects below and let's connect!
         </div>
     </div>
     """, unsafe_allow_html=True)
     
-    col1, col2, col3 = st.columns([1, 1, 1])
+    col1, col2, col3 = st.columns([1, 1, 4])
     with col1:
-        if st.button("❤️ " + str(st.session_state.likes.get("intro", 0)), key="like_intro"):
+        if st.button(f"{'❤️' if st.session_state.likes.get('intro', 0) == 1 else '🤍'} {st.session_state.likes.get('intro', 0) if st.session_state.likes.get('intro', 0) > 0 else ''}", key="like_intro"):
             toggle_like("intro")
             st.rerun()
+    
+    # Award
+    st.markdown("""
+    <div class="award-card">
+        <div style="display: flex; gap: 12px; align-items: flex-start;">
+            <div style="font-size: 32px;">🏆</div>
+            <div>
+                <h3 style="margin: 0; font-size: 18px; font-weight: bold;">3rd Place - Coursera Data Science Competition</h3>
+                <p style="margin: 4px 0 0 0; color: #71767b; font-size: 14px;">December 2022</p>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 with tab2:
     projects = [
         {
-            "id": "project1",
-            "name": "Showgeist",
-            "description": "A data-driven Streamlit web app offering interactive TV show analytics. Dive into trends, episode-level stats, genre dynamics, and viewing patterns — all in a clean, interactive interface.",
-            "tags": ["Python", "Streamlit", "Pandas", "Plotly", "Data Analysis", "API"],
-            "links": ["🔗 Live App", "💻 GitHub"],
-            "image": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=400&fit=crop"
+            "id": "udtracker",
+            "name": "UdTracker – Udemy Courses Dashboard",
+            "description": "Interactive Streamlit dashboard built for the Dataskool Challenge. Provides comprehensive KPIs and visualizations of Udemy course data including ratings, pricing, subscribers, and categories. Features real-time filtering and dynamic insights.",
+            "tags": ["Python", "Streamlit", "Pandas", "Plotly", "Data Visualization"],
+            "links": [
+                {"label": "🔗 Live App", "url": "https://udtracker.streamlit.app/"}
+            ],
+            "image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=400&fit=crop"
         },
         {
-            "id": "project2",
-            "name": "Supermarket Sales Analysis",
-            "description": "A data analytics project that explores supermarket sales data using Python. The analysis uncovers key insights on branch performance, customer demographics, product line revenue, and payment methods.",
-            "tags": ["Python", "Pandas", "Matplotlib", "Seaborn", "EDA"],
-            "links": ["💻 GitHub"],
+            "id": "vrinda",
+            "name": "Vrinda Store Sales Dashboard",
+            "description": "Excel MIS dashboard analyzing sales performance across multiple dimensions: state, gender, sales channel, and product category. Automated KPIs and visualizations monitor order trends, cancellations, and customer demographics for data-driven retail insights.",
+            "tags": ["Excel", "MIS", "Data Analysis", "KPI Tracking", "Visualization"],
+            "links": [
+                {"label": "📊 Live Dashboard", "url": "https://1drv.ms/x/c/6CE48FAEED9DCBB7/EXmE7mmBJbNOmhBELO_9ibsBmAu0Lu8NZsuylhlg1VnZAA?e=1cq1iP"}
+            ],
             "image": "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=400&fit=crop"
         },
         {
-            "id": "project3",
+            "id": "callcenter",
+            "name": "Call Center Performance Dashboard",
+            "description": "Comprehensive Excel MIS dashboard tracking operational excellence metrics: call volumes, duration, revenue generation, customer satisfaction ratings, and individual agent performance. Delivers automated KPIs and visual insights for service quality monitoring.",
+            "tags": ["Excel", "MIS", "Performance Analytics", "Customer Service", "KPIs"],
+            "links": [
+                {"label": "📊 Live Dashboard", "url": "https://1drv.ms/x/c/6CE48FAEED9DCBB7/EUE2l1R4Q8RBq5hUh6RHi78BZkdwg-z9Qg8EMjjKnV27nQ?e=c6AFvb"}
+            ],
+            "image": "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&h=400&fit=crop"
+        },
+        {
+            "id": "healthcare",
             "name": "Healthcare Operations Dashboard",
-            "description": "A detailed Power BI dashboard to monitor and optimize U.S. healthcare operations (2019–2020). Tracks patient growth, CPT units, medical expenses, payer performance, and revenue trends.",
-            "tags": ["Power BI", "SQL", "Excel", "DAX", "Data Visualization"],
-            "links": ["📊 View Dashboard"],
+            "description": "Power BI dashboard analyzing U.S. healthcare operations (2019-2020). Tracks patient growth trajectories, medical expenses, CPT units, payer performance metrics, and revenue trends to optimize healthcare delivery and financial performance.",
+            "tags": ["Power BI", "SQL", "Healthcare Analytics", "DAX", "ETL"],
+            "links": [],
             "image": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&h=400&fit=crop"
         },
         {
-            "id": "project4",
-            "name": "SCHEDULIZER",
-            "description": "A Python package for simulating and visualizing classic CPU scheduling algorithms like FCFS, SJF, Priority, and Round Robin. Designed for educational use with interactive examples.",
-            "tags": ["Python", "Educational Tools", "CLI", "PyPI Package"],
-            "links": ["💻 GitHub", "📦 PyPI"],
-            "image": "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&h=400&fit=crop"
+            "id": "m2assistant",
+            "name": "M2 – The Medical Assistant",
+            "description": "Full-stack AI system (Graduation Project) detecting 20+ diseases and symptoms using computer vision and deep learning. Integrated LLM generates comprehensive medical reports, treatment recommendations, and first-aid guidance for improved patient care.",
+            "tags": ["Python", "Deep Learning", "Computer Vision", "LLM", "Healthcare AI"],
+            "links": [],
+            "image": "https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&h=400&fit=crop"
         }
     ]
     
     for project in projects:
-        likes_count = st.session_state.likes.get(project["id"], 0) if st.session_state.likes.get(project["id"]) else 0
-        liked_class = "liked" if st.session_state.likes.get(project["id"], False) else ""
+        links_html = ''.join([f'<a href="{link["url"]}" target="_blank" class="tweet-link-btn">{link["label"]}</a>' for link in project["links"]])
         
         st.markdown(f"""
         <div class="tweet-card">
             <div class="tweet-header">
                 <div class="tweet-avatar"></div>
-                <div class="tweet-author">
-                    <div class="tweet-name">Hussein Ali</div>
-                    <div class="tweet-handle">@husaynali • Featured Project</div>
+                <div class="tweet-author-info">
+                    <div class="tweet-author-line">
+                        <span class="tweet-name">Hussein Ali</span>
+                        <span class="tweet-handle">@husaynali · Featured Project</span>
+                    </div>
                 </div>
             </div>
             <div class="tweet-content">
-                <strong style="font-size: 18px;">{project['name']}</strong><br>
+                <div class="tweet-title">{project['name']}</div>
                 {project['description']}
             </div>
             <img src="{project['image']}" class="tweet-image">
             <div class="tweet-tags">
                 {''.join([f'<span class="tweet-tag">{tag}</span>' for tag in project['tags']])}
             </div>
+            {f'<div class="tweet-links">{links_html}</div>' if links_html else ''}
         </div>
         """, unsafe_allow_html=True)
         
         col1, col2, col3 = st.columns([1, 1, 4])
         with col1:
-            if st.button(f"{'❤️' if st.session_state.likes.get(project['id'], False) else '🤍'} {likes_count if likes_count > 0 else ''}", key=f"like_{project['id']}"):
+            if st.button(f"{'❤️' if st.session_state.likes.get(project['id'], 0) == 1 else '🤍'} {st.session_state.likes.get(project['id'], 0) if st.session_state.likes.get(project['id'], 0) > 0 else ''}", key=f"like_{project['id']}"):
                 toggle_like(project['id'])
-                if st.session_state.likes[project['id']]:
-                    if project['id'] not in st.session_state.likes or isinstance(st.session_state.likes[project['id']], bool):
-                        st.session_state.likes[project['id']] = 1
-                    else:
-                        st.session_state.likes[project['id']] += 1
                 st.rerun()
 
 with tab3:
-    st.markdown("""
-    <div class="tweet-card">
-        <div class="tweet-header">
-            <div class="tweet-avatar"></div>
-            <div class="tweet-author">
-                <div class="tweet-name">Hussein Ali</div>
-                <div class="tweet-handle">@husaynali • Tech Stack</div>
-            </div>
-        </div>
-        <div class="tweet-content">
-            <strong style="font-size: 18px;">Technologies I Work With</strong><br><br>
-            As a Computer Science graduate with a specialization in Data and a strong passion for Business Intelligence, 
-            I enjoy working with data-driven technologies that uncover insights and support smart decision-making.
-        </div>
-        <div class="tweet-tags">
-            <span class="tweet-tag">Python</span>
-            <span class="tweet-tag">PostgreSQL</span>
-            <span class="tweet-tag">MySQL</span>
-            <span class="tweet-tag">MongoDB</span>
-            <span class="tweet-tag">Metabase</span>
-            <span class="tweet-tag">Apache Superset</span>
-            <span class="tweet-tag">Power BI</span>
-            <span class="tweet-tag">Excel</span>
-            <span class="tweet-tag">Google Sheets</span>
-            <span class="tweet-tag">Jupyter</span>
-            <span class="tweet-tag">Git</span>
-            <span class="tweet-tag">GitHub</span>
-            <span class="tweet-tag">Docker</span>
-            <span class="tweet-tag">AWS</span>
-            <span class="tweet-tag">Azure</span>
-            <span class="tweet-tag">GCP</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with tab4:
-    blogs = [
+    experiences = [
         {
-            "id": "blog1",
-            "title": "The AI Gold Rush: Are We Repeating the Same Mistakes?",
-            "description": "A critical look at the current AI boom, exploring how hype-driven decisions echo past tech bubbles. What are we overlooking in our pursuit of innovation?",
-            "tags": ["AI Trends", "Tech Ethics", "Strategy"],
-            "image": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=400&fit=crop"
+            "id": "exp1",
+            "title": "MIS Specialist",
+            "company": "Etisalat Egypt",
+            "location": "Cairo (Onsite)",
+            "period": "Oct 2025 - Present",
+            "highlights": [
+                "Developed and maintained MIS reports and dashboards to monitor operational, service, and financial KPIs for the Keeta project",
+                "Analyzed performance trends, delivery SLAs, and cost metrics to identify inefficiencies and support decision-making"
+            ]
         },
         {
-            "id": "blog2",
-            "title": "The Two Sum Problem",
-            "description": "A beginner-friendly walkthrough of LeetCode's Two Sum problem, covering brute-force, optimized hash-map approaches, and real-world interview tips.",
-            "tags": ["Python", "Algorithms", "Problem Solving"],
-            "image": "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=800&h=400&fit=crop"
+            "id": "exp2",
+            "title": "Data Analyst Intern",
+            "company": "COB Solution",
+            "location": "Cairo (Hybrid)",
+            "period": "Feb 2023 - Aug 2023",
+            "highlights": [
+                "Analyzed healthcare billing and financial KPIs, identifying inefficiencies and saving costs",
+                "Built automated Power BI dashboards, cutting manual reporting effort by 60%"
+            ]
+        },
+        {
+            "id": "exp3",
+            "title": "Data Analyst Intern",
+            "company": "Business Spike",
+            "location": "Beni-Suef (Onsite)",
+            "period": "Jul 2021 - Jan 2022",
+            "highlights": [
+                "Developed ML models forecasting financial trends with 85% accuracy, guiding investment strategies",
+                "Built KPI dashboards in Power BI and Looker, improving data-driven decision-making"
+            ]
         }
     ]
     
-    for blog in blogs:
+    for exp in experiences:
         st.markdown(f"""
-        <div class="tweet-card">
-            <div class="tweet-header">
-                <div class="tweet-avatar"></div>
-                <div class="tweet-author">
-                    <div class="tweet-name">Hussein Ali</div>
-                    <div class="tweet-handle">@husaynali • Blog Post</div>
+        <div class="exp-card">
+            <div class="exp-header">
+                <div class="exp-icon">💼</div>
+                <div class="exp-details">
+                    <h3>{exp['title']}</h3>
+                    <div class="company">{exp['company']}</div>
+                    <div class="meta">
+                        <span>📍 {exp['location']}</span>
+                        <span>📅 {exp['period']}</span>
+                    </div>
                 </div>
             </div>
-            <div class="tweet-content">
-                <strong style="font-size: 18px;">{blog['title']}</strong><br>
-                {blog['description']}
-            </div>
-            <img src="{blog['image']}" class="tweet-image">
-            <div class="tweet-tags">
-                {''.join([f'<span class="tweet-tag">{tag}</span>' for tag in blog['tags']])}
+            <div class="exp-highlights">
+                <ul style="margin: 0; padding-left: 20px;">
+                    {''.join([f'<li>{highlight}</li>' for highlight in exp['highlights']])}
+                </ul>
             </div>
         </div>
         """, unsafe_allow_html=True)
-        
-        col1, col2, col3 = st.columns([1, 1, 4])
-        with col1:
-            if st.button(f"🤍", key=f"like_{blog['id']}"):
-                toggle_like(blog['id'])
-                st.rerun()
 
-with tab5:
-    st.markdown("""
-    <div class="tweet-card">
-        <div class="tweet-header">
-            <div class="tweet-avatar"></div>
-            <div class="tweet-author">
-                <div class="tweet-name">Hussein Ali</div>
-                <div class="tweet-handle">@husaynali • Let's Connect</div>
+with tab4:
+    # Skills Progress Bars
+    st.markdown("<h3 style='color: #e7e9ea; margin-bottom: 20px;'>📈 Core Proficiencies</h3>", unsafe_allow_html=True)
+    
+    skills = {
+        "Python": 90,
+        "SQL": 85,
+        "Power BI": 88,
+        "Excel": 90,
+        "Machine Learning": 80,
+        "ETL Development": 85,
+        "Data Visualization": 92
+    }
+    
+    for skill, level in skills.items():
+        st.markdown(f"""
+        <div class="skill-bar-container">
+            <div class="skill-bar-header">
+                <span class="name">{skill}</span>
+                <span class="percent">{level}%</span>
+            </div>
+            <div class="skill-bar-bg">
+                <div class="skill-bar-fill" style="width: {level}%;"></div>
             </div>
         </div>
-        <div class="tweet-content">
-            <strong style="font-size: 20px;">Have a project or looking to hire?</strong><br><br>
-            Feel free to reach out if you're looking to hire, just want to connect, or see if we can build something amazing together.
-            <br><br>
-            📧 <a href="mailto:hire-hussein@proton.me" style="font-size: 18px;">hire-hussein@proton.me</a>
-            <br><br>
-            <a href="mailto:hire-hussein@proton.me" class="contact-btn">📩 Get in touch</a>
-        </div>
+        """, unsafe_allow_html=True)
+    
+    # Technologies
+    st.markdown("<h3 style='color: #e7e9ea; margin: 30px 0 20px 0;'>🔧 Technologies & Tools</h3>", unsafe_allow_html=True)
+    st.markdown("""
+    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 30px;">
+        <span class="tweet-tag">Python</span>
+        <span class="tweet-tag">PostgreSQL</span>
+        <span class="tweet-tag">MySQL</span>
+        <span class="tweet-tag">MongoDB</span>
+        <span class="tweet-tag">Metabase</span>
+        <span class="tweet-tag">Apache Superset</span>
+        <span class="tweet-tag">Power BI</span>
+        <span class="tweet-tag">Excel</span>
+        <span class="tweet-tag">Google Sheets</span>
+        <span class="tweet-tag">Jupyter</span>
+        <span class="tweet-tag">Git</span>
+        <span class="tweet-tag">GitHub</span>
+        <span class="tweet-tag">Docker</span>
+        <span class="tweet-tag">AWS</span>
+        <span class="tweet-tag">Azure</span>
+        <span class="tweet-tag">GCP</span>
+        <span class="tweet-tag">Pandas</span>
+        <span class="tweet-tag">NumPy</span>
+        <span class="tweet-tag">Matplotlib</span>
+        <span class="tweet-tag">Seaborn</span>
+        <span class="tweet-tag">Scikit-learn</span>
+        <span class="tweet-tag">PyTorch</span>
+        <span class="tweet-tag">Looker</span>
+        <span class="tweet-tag">Jira</span>
     </div>
     """, unsafe_allow_html=True)
+    
+    # Soft Skills
+    st.markdown("<h3 style='color: #e7e9ea; margin-bottom: 20px;'>💡 Soft Skills</h3>", unsafe_allow_html=True)
+    st.markdown("""
+    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+        <span class="tweet-tag">Problem Solving</span>
+        <span class="tweet-tag">Communication</span>
+        <span class="tweet-tag">Collaboration</span>
+        <span class="tweet-tag">Adaptability</span>
+        <span class="tweet-tag">Continuous Learning</span>
+        <span class="tweet-tag">Critical Thinking</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+with tab5:
+    certifications = [
+        {"name": "Microsoft Machine Learning Engineer", "issuer": "DEPI", "date": "Oct 2024"},
+        {"name": "Google Data Analytics Professional", "issuer": "Coursera", "date": "Jan 2023"},
+        {"name": "Machine Learning Specialization", "issuer": "Coursera", "date": "Oct 2022"},
+        {"name": "Data Analyst Track", "issuer": "ITI TechLeaps", "date": "Dec 2022"},
+        {"name": "Machine Learning with Python", "issuer": "FreeCodeCamp", "date": "Sep 2022"},
+        {"name": "Data Analysis with Python", "issuer": "FreeCodeCamp", "date": "Jul 2022"}
+    ]
+    
+    for cert in certifications:
+        st.markdown(f"""
+        <div class="cert-card">
+            <div class="cert-icon">🎓</div>
+            <div class="cert-details">
+                <h4>{cert['name']}</h4>
+                <div class="issuer">{cert['issuer']}</div>
+                <div class="date">{cert['date']}</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
 # Footer
 st.markdown("""
 <div style="text-align: center; padding: 40px 0 20px 0; color: #71767b; border-top: 1px solid #2f3336; margin-top: 40px;">
-    © 2026 Hussein Ali • Built with ❤️ (and secretly with Streamlit 🤫)
+    © 2026 Hussein Ali • Built with ❤️ using Streamlit
 </div>
 """, unsafe_allow_html=True)
